@@ -74,7 +74,7 @@ uv sync
 
 3. `.env` 파일 설정하기
 
-`.env.example` 파일을 `.env`로 복사하고 필요한 API 키를 추가합니다:
+`.env.example` 파일을 `.env`로 복사하고 필요한 API 키를 추가합니다.
 
 ```bash
 cp .env.example .env
@@ -176,8 +176,16 @@ LLM_PROVIDER=AZURE_OPENAI
 
 모든 설정이 완료되었다면, 다음 명령어로 실행할 수 있습니다.
 
+> Windows(PowerShell)
+
 ```bash
-docker-compose build --no-cache && docker-compose up -d
+docker compose build --no-cache; docker-compose up -d
+```
+
+> Mac / Linux
+
+```bash
+docker compose build --no-cache && docker-compose up -d
 ```
 
 **접속 주소**
