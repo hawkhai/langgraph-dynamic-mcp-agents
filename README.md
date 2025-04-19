@@ -63,7 +63,7 @@
 
 ```bash
 git clone https://github.com/teddynote-lab/langgraph-dynamic-mcp-agents
-cd langgraph-react-mcp-chat
+cd langgraph-dynamic-mcp-agents
 ```
 
 2. uv를 사용하여 가상 환경 생성 및 의존성 설치
