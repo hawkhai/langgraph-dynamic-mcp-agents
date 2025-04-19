@@ -4,6 +4,9 @@
 
 .langgraph_api/
 .venv/
+mcp-config/
+prompts/
+resources/
 
 # Python
 __pycache__/

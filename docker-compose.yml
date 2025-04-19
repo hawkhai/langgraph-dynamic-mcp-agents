@@ -46,6 +46,8 @@ services:
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
         volumes:
             - ./mcp-config:/app/mcp-config
+            - ./resources:/app/resources
+            - ./prompts:/app/prompts
     streamlit-app:
         build:
             context: .
@@ -54,4 +56,7 @@ services:
             - "2025:8501"
         volumes:
             - ./src:/app/src
+            - ./mcp-config:/app/mcp-config
+            - ./resources:/app/resources
+            - ./prompts:/app/prompts
         restart: unless-stopped

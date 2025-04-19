@@ -1,0 +1,27 @@
+{
+  "mcpServers": {
+    "perplexity-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@arjunkmrm/perplexity-search",
+        "--key",
+        "your_smithery_api_key"
+      ],
+      "transport": "stdio"
+    },
+    "langchain-dev-docs": {
+      "url": "https://teddynote.io/mcp/langchain/sse",
+      "transport": "sse"
+    },
+    "get_current_time": {
+      "command": "python",
+      "args": [
+        "/app/resources/mcp_server_time.py"
+      ],
+      "transport": "stdio"
+    }
+  }
+}

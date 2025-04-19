@@ -1,6 +1,7 @@
 import streamlit as st
 import glob
 import json
+import os
 from pathlib import Path
 from copy import deepcopy
 
@@ -10,22 +11,34 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+# Define the mcp-config directory
+MCP_CONFIG_DIR = "mcp-config"
+# Create directory if it doesn't exist
+os.makedirs(MCP_CONFIG_DIR, exist_ok=True)
+
 # 사이드바 최상단에 저자 정보 추가 (다른 사이드바 요소보다 먼저 배치)
 st.sidebar.markdown("### ✍️ Made by [테디노트](https://youtube.com/c/teddynote) 🚀")
 st.sidebar.markdown(
-    "### 💻 [Project Page](https://github.com/teddynote-lab/langgraph-mcp-agents)"
+    "### 💻 [Project Page](https://github.com/teddynote-lab/langgraph-dynamic-mcp-agents)"
 )
 
 # --- Sidebar for File Selection & Save ---
 with st.sidebar:
     st.header("📂 설정 파일 선택 & 저장")
     # JSON 파일 목록
-    json_paths = glob.glob("src/react_agent/*.json")
+    json_paths = glob.glob(f"{MCP_CONFIG_DIR}/*.json")
+    # If no JSON files found, add a default mcp_config.json option
+    if not json_paths and not os.path.exists(f"{MCP_CONFIG_DIR}/mcp_config.json"):
+        default_config = {"mcpServers": {}}
+        with open(f"{MCP_CONFIG_DIR}/mcp_config.json", "w", encoding="utf-8") as f:
+            json.dump(default_config, f, indent=2, ensure_ascii=False)
+        json_paths = [f"{MCP_CONFIG_DIR}/mcp_config.json"]
+
     tools_list = [{"name": Path(p).stem, "path": p} for p in json_paths]
     selected_name = st.selectbox("설정 파일 선택", [t["name"] for t in tools_list])
 
     # Load 설정
-    if st.button("📥 Load 설정", key="load", use_container_width=True):
+    if st.button("📥 선택된 파일 Load", key="load", use_container_width=True):
         selected = next(t for t in tools_list if t["name"] == selected_name)
         with open(selected["path"], encoding="utf-8") as f:
             st.session_state.tool_config = json.load(f)

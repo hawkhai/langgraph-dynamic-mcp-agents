@@ -1,4 +1,4 @@
-# LangGraph ReAct MCP Chat
+# LangGraph Dynamic MCP Agents
 
 ![Python](https://img.shields.io/badge/Python-3.11+-blue.svg)
 ![LangChain](https://img.shields.io/badge/LangChain-0.3.23+-green.svg)
@@ -7,44 +7,69 @@
 
 ## 프로젝트 개요
 
-![project demo](./assets/teddyflow-mcp-chat.png)
+> 채팅 인터페이스
 
-`LangGraph ReAct MCP Chat`은 Model Context Protocol(MCP)을 통해 다양한 외부 도구와 데이터 소스에 접근할 수 있는 ReAct 에이전트를 구현한 프로젝트입니다. 이 프로젝트는 LangGraph를 기반으로 하며, MCP 도구를 쉽게 추가하고 구성할 수 있는 인터페이스를 제공합니다.
+![Project Overview](./assets/Project-Overview.png)
 
-### 사용 사례
+`LangGraph Dynamic MCP Agents` 은 Model Context Protocol(MCP)을 통해 다양한 외부 도구와 데이터 소스에 접근할 수 있는 ReAct 에이전트를 구현한 프로젝트입니다. 이 프로젝트는 LangGraph 의 ReAct 에이전트를 기반으로 하며, MCP 도구를 쉽게 추가하고 구성할 수 있는 인터페이스를 제공합니다.
 
-![chat demo](./assets/teddyflow-mcp-chat2.png)
+![Project Demo](./assets/MCP-Agents-TeddyFlow.png)
 
-![chat demo](./assets/teddyflow-mcp-chat3.png)
+### 주요 기능
+ 
+**동적 방식으로 도구 설정 대시보드**
 
-![chat demo](./assets/teddyflow-mcp-chat4.png)
+`http://localhost:2025` 에 접속하여 도구 설정 대시보드를 확인할 수 있습니다.
+
+![Tool Settings](./assets/Tools-Settings.png)
+
+**도구 추가** 탭에서 [Smithery](https://smithery.io) 에서 사용할 MCP 도구의 JSON 구성을 복사 붙여넣기 하여 도구를 추가할 수 있습니다.
+
+![Tool Settings](./assets/Add-Tools.png)
+
+----
+
+**실시간 반영**
+
+도구 설정 대시보드에서 도구를 추가하거나 수정하면 실시간으로 반영됩니다.
+
+![List Tools](./assets/List-Tools.png)
+
+**시스템 프롬프트 설정**
+
+`prompts/system_prompt.yaml` 파일을 수정하여 시스템 프롬프트를 설정할 수 있습니다.
+
+이 또한 동적으로 바로 반영되는 형태입니다.
+
+![System Prompt](./assets/System-Prompt.png)
+
+만약, 에이전트에 설정되는 시스템프롬프트를 수정하고 싶다면 `prompts/system_prompt.yaml` 파일의 내용을 수정하면 됩니다.
+
+----
 
 ### 주요 기능
 
 * **LangGraph ReAct 에이전트**: LangGraph를 기반으로 하는 ReAct 에이전트
-* **도구 관리**: MCP 도구를 쉽게 추가, 제거, 구성 가능 (Smithery JSON 형식 지원)
-* **스트리밍 응답**: 에이전트의 응답과 도구 호출을 실시간으로 확인
+* **실시간 동적 도구 관리**: MCP 도구를 쉽게 추가, 제거, 구성 가능 (Smithery JSON 형식 지원)
+* **실시간 동적 시스템 프롬프트 설정**: 시스템 프롬프트를 쉽게 수정 가능 (동적 반영)
 * **대화 기록**: 에이전트와의 대화 내용 추적 및 관리
-
-## 아키텍처
-
-![architecture](./assets/teddyflow-architecture.png)
+* **TeddyFlow 연동**: 채팅 인터페이스 연동
+* **Docker 이미지 빌드**: Docker 이미지 빌드 가능
+* **localhost 지원**: localhost 로 실행 가능(채팅 인터페이스 연동 가능)
 
 ## 설치 방법
 
 1. 저장소 복제하기
 
 ```bash
-git clone https://github.com/teddynote-lab/langgraph-react-mcp-chat.git
+git clone https://github.com/teddynote-lab/langgraph-dynamic-mcp-agents
 cd langgraph-react-mcp-chat
 ```
 
 2. uv를 사용하여 가상 환경 생성 및 의존성 설치
 
 ```bash
-uv venv
-source .venv/bin/activate  # Windows의 경우: .venv\Scripts\activate
-uv pip install -r requirements.txt
+uv sync
 ```
 
 3. `.env` 파일 설정하기
@@ -55,90 +80,111 @@ uv pip install -r requirements.txt
 cp .env.example .env
 ```
 
-아래는 필요한 API 키 목록입니다:
+`.env` 파일에서 `LLM_PROVIDER` 를 설정합니다.
+
+선택 가능(택 1): `ANTHROPIC`, `OPENAI`, `AZURE_OPENAI`
+
 ```
-ANTHROPIC_API_KEY=your_anthropic_api_key
-OPENAI_API_KEY=your_openai_api_key
-LANGSMITH_TRACING=true
-LANGSMITH_ENDPOINT=https://api.smith.langchain.com
-LANGSMITH_API_KEY=your_langsmith_api_key
-LANGSMITH_PROJECT=your_langsmith_project
+LLM_PROVIDER=AZURE_OPENAI
 ```
 
-4. MCP 도구 구성하기
+아래는 필요한 API 키 목록입니다. (선택한 `LLM_PROVIDER` 에 따라 설정합니다)
 
-먼저, 예시로 작성한 `mcp_config_sample.json` 파일을 `mcp_config.json` 파일로 파일명을 변경합니다.
+`Anthropic`, `OpenAI`, `Azure OpenAI` 에서 사용할 API 키를 설정합니다.(반드시 하나의 모델은 설정되어야 합니다.)
+
+- `ANTHROPIC_API_KEY`: Anthropic API 키
+- `OPENAI_API_KEY`: OpenAI API 키
+- `AZURE_OPENAI_API_KEY`: Azure OpenAI API 키
+- `AZURE_OPENAI_ENDPOINT`: Azure OpenAI 엔드포인트
+
+
+4. MCP 도구 설정
+
+`mcp-config` 폴더에 있는 `mcp_config.json` 파일을 기준으로 모델이 사용할 MCP 도구를 설정합니다.
+
+따라서, 미리 사용하고자 하는 MCP 도구를 JSON 형식으로 설정해 둘 수 있습니다.
+이 과정은 도구 설정 대시보드에서도 설정이 가능합니다.
 
 아래는 샘플로 작성된 예시입니다.
 
 ```json
 {
-    "mcpServers": {
-        "desktop-commander": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@smithery/cli@latest",
-                "run",
-                "@wonderwhy-er/desktop-commander",
-                "--key",
-                "Smithery API_KEY 입력"
-            ]
-        },
-        "perplexity-search": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@smithery/cli@latest",
-                "run",
-                "@arjunkmrm/perplexity-search",
-                "--config",
-                "{\"perplexityApiKey\":\"Perplexity API_KEY 입력\"}"
-            ]
-        },
-        "hyperbrowser": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@smithery/cli@latest",
-                "run",
-                "@hyperbrowserai/mcp",
-                "--key",
-                "Smithery API_KEY 입력"
-            ]
-        },
-        "todoist-mcp": {
-            "command": "npx",
-            "args": [
-                "-y",
-                "@smithery/cli@latest",
-                "run",
-                "@miottid/todoist-mcp",
-                "--key",
-                "Smithery API_KEY 입력"
-            ]
-        }
+  "mcpServers": {
+    "perplexity-search": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@smithery/cli@latest",
+        "run",
+        "@arjunkmrm/perplexity-search",
+        "--key",
+        "SMITHERY_API_KEY 를 입력하세요"
+      ],
+      "transport": "stdio"
+    },
+    "get_current_time": {
+      "command": "python",
+      "args": [
+        "/app/resources/mcp_server_time.py"
+      ],
+      "transport": "stdio"
     }
+  }
 }
 ```
 
-[Smithery](https://smithery.ai/) 에서 사용할 MCP 도구의 JSON 구성을 가져와 `mcp_config.json` 파일에 추가해야 합니다
+5. .py 파일을 MCP `stdio` 서버로 추가
+
+- (참고) `resources` 폴더에 있는 `mcp_server_time.py` 파일을 참고하시기 바랍니다.
+
+1. 사용하고자 하는 커스텀 작성된 .py 파일을 `resources` 폴더에 추가합니다. 그리고 `stdio` 서버로 실행할 수 있도록 코드를 작성합니다.
+
+2. `mcp-config/mcp_config.json` 에 추가할 때 파일 경로를 수정합니다.
+
+    **규칙**
+
+    `./resources/파일명.py` > `/app/resources/파일명.py`
+
+    예를 들어, `./resources/mcp_server_time.py` 파일을 추가하고자 한다면 `/app/resources/mcp_server_time.py` 로 설정합니다.
+
+    ```json
+    "get_current_time": {
+        "command": "python",
+        "args": [
+        "/app/resources/mcp_server_time.py"
+        ],
+        "transport": "stdio"
+    }
+    ```
+
+6. Smithery 에 등록된 도구 추가
+
+[Smithery](https://smithery.ai/) 에서 사용할 MCP 도구의 JSON 구성을 가져와 도구 대시보드에서 쉽게 추가할 수 있습니다.
 
 1. [Smithery](https://smithery.io) 웹사이트를 방문하여 사용하고 싶은 도구를 선택합니다.
 2. 도구 페이지에서 오른쪽의 'COPY' 버튼을 클릭하여 JSON 구성을 복사합니다.
+
+![Smithery Copy JSON](./assets/smithery-copy-json.png)
+
 3. `mcp_config.json` 파일을 열고 복사한 JSON을 추가합니다.
 
-**중요**: 파일 이름은 반드시 `mcp_config.json`으로 저장해야 합니다. 다른 이름을 사용할 경우 프로그램이 올바르게 작동하지 않습니다.
+> 복사한 내용을 붙여넣기 합니다.
+
+![Add Smithery Tool](./assets/Add-Smithery-Tool.png)
 
 ## 애플리케이션 실행
 
-모든 설정이 완료되었다면, 다음 명령어로 LangGraph 개발 서버를 실행할 수 있습니다:
+모든 설정이 완료되었다면, 다음 명령어로 실행할 수 있습니다.
 
 ```bash
-langgraph dev
+docker-compose build --no-cache && docker-compose up -d
 ```
 
-서버가 성공적으로 시작되면 웹 브라우저에서 로컬 주소(일반적으로 http://localhost:3000)를 통해 애플리케이션에 접속할 수 있습니다.
+**접속 주소**
+
+- TeddyFlow 연동: https://teddyflow.com/
+- 채팅 인터페이스: `http://localhost:2025`
+- 도구 설정 대시보드: `http://localhost:2024`
 
 ## teddyflow.com 연결 방법
 

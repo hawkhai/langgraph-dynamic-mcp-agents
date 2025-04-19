@@ -13,9 +13,12 @@ from react_agent import utils
 from contextlib import asynccontextmanager
 from langchain_mcp_adapters.client import MultiServerMCPClient
 from langgraph.prebuilt import create_react_agent
-from langchain_openai.chat_models import AzureChatOpenAI
+from langchain_openai.chat_models import AzureChatOpenAI, ChatOpenAI
+from langchain_anthropic.chat_models import ChatAnthropic
 from langgraph.checkpoint.memory import MemorySaver
 from langchain_core.runnables import RunnableConfig
+from langchain_core.prompts import load_prompt
+
 import os
 
 memory = MemorySaver()
@@ -24,14 +27,39 @@ memory = MemorySaver()
 @asynccontextmanager
 async def make_graph(mcp_tools: Dict[str, Dict[str, str]]):
     async with MultiServerMCPClient(mcp_tools) as client:
-        model = AzureChatOpenAI(
-            deployment_name="gpt-4.1",
-            api_version="2024-12-01-preview",
-            azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
-            api_key=os.environ["AZURE_OPENAI_API_KEY"],
-            temperature=0.1,
-            max_tokens=32000,
-        )
+        if os.environ["LLM_PROVIDER"] == "AZURE_OPENAI":
+            if os.environ["LLM_MODEL_NAME"] in [
+                "gpt-4.1",
+                "gpt-4.1-mini",
+                "gpt-4.1-nano",
+                "gpt-4o",
+                "gpt-4o-mini",
+                "gpt-4o-mini",
+            ]:
+                model = AzureChatOpenAI(
+                    deployment_name=os.environ["LLM_MODEL_NAME"],
+                    api_version="2024-12-01-preview",
+                    azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+                    api_key=os.environ["AZURE_OPENAI_API_KEY"],
+                    temperature=0.1,
+                    max_tokens=32000,
+                )
+            elif os.environ["LLM_MODEL_NAME"] in ["o3-mini", "o4-mini"]:
+                model = AzureChatOpenAI(
+                    deployment_name=os.environ["LLM_MODEL_NAME"],
+                    api_version="2024-12-01-preview",
+                    azure_endpoint=os.environ["AZURE_OPENAI_ENDPOINT"],
+                    api_key=os.environ["AZURE_OPENAI_API_KEY"],
+                )
+        elif os.environ["LLM_PROVIDER"] == "OPENAI":
+            model = ChatOpenAI(model=os.environ["LLM_MODEL_NAME"], temperature=0.1)
+        elif os.environ["LLM_PROVIDER"] == "ANTHROPIC":
+            model = ChatAnthropic(
+                model="claude-3-7-sonnet-latest",
+                temperature=1,
+                max_tokens=64000,
+                thinking={"type": "enabled", "budget_tokens": 4096},
+            )
         agent = create_react_agent(model, client.get_tools(), checkpointer=memory)
         yield agent
 
@@ -53,11 +81,15 @@ async def call_model(
     configuration = Configuration.from_runnable_config(config)
 
     # Format the system prompt. Customize this to change the agent's behavior.
-    system_message = configuration.system_prompt.format(
-        system_time=datetime.now(
-            tz=timezone(timedelta(hours=9), "Asia/Seoul")
-        ).isoformat()
-    )
+    # system_message = configuration.system_prompt.format(
+    #     system_time=datetime.now(
+    #         tz=timezone(timedelta(hours=9), "Asia/Seoul")
+    #     ).isoformat()
+    # )
+
+    system_message = load_prompt(
+        "/app/prompts/system_prompt.yaml", encoding="utf-8"
+    ).format()
 
     # Get the MCP config path from mounted volume
     mcp_config_json_path = "/app/mcp-config/mcp_config.json"
