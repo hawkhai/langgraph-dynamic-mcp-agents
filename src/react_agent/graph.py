@@ -59,13 +59,20 @@ async def call_model(
         ).isoformat()
     )
 
-    mcp_config_json_path = configuration.mcp_config_json_path
+    # Get the MCP config path from mounted volume
+    mcp_config_json_path = "/app/mcp-config/mcp_config.json"
 
-    mcp_tools = await utils.load_mcp_config_json(mcp_config_json_path)
+    mcp_tools = {}
+    if os.path.exists(mcp_config_json_path):
+        mcp_tools = await utils.load_mcp_config_json(mcp_config_json_path)
+        # Extract the servers configuration from mcpServers key
+        mcp_tools = mcp_tools.get("mcpServers", {})
+        print(f"Loaded MCP tools from {mcp_config_json_path}")
+    else:
+        print(f"Warning: MCP config file not found at {mcp_config_json_path}")
+        mcp_tools = {}
 
-    # Extract the servers configuration from mcpServers key
-    mcp_tools = mcp_tools.get("mcpServers", {})
-
+    print("설정된 mcp_tools(JSON)")
     print(mcp_tools)
 
     response = None

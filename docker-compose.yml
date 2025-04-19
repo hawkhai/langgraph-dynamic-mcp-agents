@@ -1,6 +1,8 @@
 volumes:
     langgraph-data:
         driver: local
+    mcp-configs:
+        driver: local
 services:
     langgraph-redis:
         image: redis:6
@@ -26,9 +28,11 @@ services:
             retries: 5
             interval: 5s
     langgraph-api:
-        image: "teddylee777/langgraph-dynamic-mcp-agents:latest"
+        build:
+            context: .
+            dockerfile: Dockerfile.node
         ports:
-            - "7777:8000"
+            - "2024:8000"
         depends_on:
             langgraph-redis:
                 condition: service_healthy
@@ -40,12 +44,14 @@ services:
             REDIS_URI: redis://langgraph-redis:6379
             LANGSMITH_API_KEY: ${LANGSMITH_API_KEY}
             POSTGRES_URI: postgres://postgres:postgres@langgraph-postgres:5432/postgres?sslmode=disable
+        volumes:
+            - ./mcp-config:/app/mcp-config
     streamlit-app:
         build:
             context: .
             dockerfile: streamlit.Dockerfile
         ports:
-            - "8501:8501"
+            - "2025:8501"
         volumes:
             - ./src:/app/src
         restart: unless-stopped

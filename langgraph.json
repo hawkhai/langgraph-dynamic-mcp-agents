@@ -4,6 +4,5 @@
   "graphs": {
     "agent": "./src/react_agent/graph.py:graph"
   },
-  "env": ".env",
-  "resources": ["./src/react_agent/mcp_config.json"]
+  "env": ".env"
 }
