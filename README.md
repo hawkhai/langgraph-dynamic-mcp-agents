@@ -191,8 +191,8 @@ docker compose build --no-cache && docker-compose up -d
 **접속 주소**
 
 - TeddyFlow 연동: https://teddyflow.com/
-- 채팅 인터페이스: `http://localhost:2025`
-- 도구 설정 대시보드: `http://localhost:2024`
+- 채팅 인터페이스: `http://localhost:2024`
+- 도구 설정 대시보드: `http://localhost:2025`
 
 ## teddyflow.com 연결 방법
 
