@@ -6,7 +6,7 @@ from pathlib import Path
 from copy import deepcopy
 
 st.set_page_config(
-    page_title="Tool 설정",
+    page_title="工具设置",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -16,16 +16,16 @@ MCP_CONFIG_DIR = "mcp-config"
 # Create directory if it doesn't exist
 os.makedirs(MCP_CONFIG_DIR, exist_ok=True)
 
-# 사이드바 최상단에 저자 정보 추가 (다른 사이드바 요소보다 먼저 배치)
-st.sidebar.markdown("### ✍️ Made by [테디노트](https://youtube.com/c/teddynote) 🚀")
+# 侧边栏顶部添加作者信息（放置在其他侧边栏元素之前）
+st.sidebar.markdown("### ✍️ Made by [TeddyNote](https://youtube.com/c/teddynote) 🚀")
 st.sidebar.markdown(
     "### 💻 [Project Page](https://github.com/teddynote-lab/langgraph-dynamic-mcp-agents)"
 )
 
 # --- Sidebar for File Selection & Save ---
 with st.sidebar:
-    st.header("📂 설정 파일 선택 & 저장")
-    # JSON 파일 목록
+    st.header("📂 配置文件选择 & 保存")
+    # JSON文件列表
     json_paths = glob.glob(f"{MCP_CONFIG_DIR}/*.json")
     # If no JSON files found, add a default mcp_config.json option
     if not json_paths and not os.path.exists(f"{MCP_CONFIG_DIR}/mcp_config.json"):
@@ -35,39 +35,39 @@ with st.sidebar:
         json_paths = [f"{MCP_CONFIG_DIR}/mcp_config.json"]
 
     tools_list = [{"name": Path(p).stem, "path": p} for p in json_paths]
-    selected_name = st.selectbox("설정 파일 선택", [t["name"] for t in tools_list])
+    selected_name = st.selectbox("配置文件选择", [t["name"] for t in tools_list])
 
-    # Load 설정
-    if st.button("📥 선택된 파일 Load", key="load", use_container_width=True):
+    # 加载配置
+    if st.button("📥 加载选中文件", key="load", use_container_width=True):
         selected = next(t for t in tools_list if t["name"] == selected_name)
         with open(selected["path"], encoding="utf-8") as f:
             st.session_state.tool_config = json.load(f)
         st.session_state.file_path = selected["path"]
         st.session_state.loaded = True
-        st.success(f"Loaded: {selected_name}.json")
+        st.success(f"已加载: {selected_name}.json")
 
-    # Save 변경사항
+    # 保存更改
     if st.session_state.get("loaded", False):
-        if st.button("💾 저장", key="save", use_container_width=True):
+        if st.button("💾 保存", key="save", use_container_width=True):
             with open(st.session_state.file_path, "w", encoding="utf-8") as f:
                 json.dump(st.session_state.tool_config, f, indent=2, ensure_ascii=False)
             st.session_state.saved_msg = (
-                f"저장 완료: {Path(st.session_state.file_path).name}"
+                f"保存完成: {Path(st.session_state.file_path).name}"
             )
             st.rerun()
 
 # --- Main Area ---
-st.title("🔧 MCP Agents Tool 설정")
+st.title("🔧 MCP Agents 工具设置")
 
 if not st.session_state.get("loaded", False):
-    st.info("사이드바에서 JSON 파일을 로드하세요.")
+    st.info("请在侧边栏加载JSON文件。")
 else:
-    # 탭 구성: 목록, 추가, JSON 미리보기, Cursor AI, Claude Desktop
+    # 标签页配置：列表、添加、JSON预览、Cursor AI、Claude Desktop
     tab1, tab2, tab3, tab4, tab5 = st.tabs(
         [
-            "📝 Tool 목록",
-            "➕ 도구 추가",
-            "🔍 JSON 미리보기",
+            "📝 工具列表",
+            "➕ 添加工具",
+            "🔍 JSON预览",
             "💻 Cursor AI",
             "🤖 Claude Desktop",
         ]
@@ -77,21 +77,21 @@ else:
     with tab1:
         mcp = st.session_state.tool_config.get("mcpServers", {})
         if not mcp:
-            st.warning("등록된 도구가 없습니다.")
+            st.warning("没有已注册的工具。")
         else:
             for name in list(mcp.keys()):
                 col1, col2 = st.columns([9, 1])
                 with col1:
                     st.write(f"• **{name}**")
                 with col2:
-                    if st.button("삭제", key=f"del_{name}"):
+                    if st.button("删除", key=f"del_{name}"):
                         del st.session_state.tool_config["mcpServers"][name]
-                        st.success(f"도구 '{name}' 삭제됨")
+                        st.success(f"工具 '{name}' 已删除")
                         st.rerun()
 
     # Tab2: Add Tool
     with tab2:
-        st.markdown("🔍 [Smithery 바로가기](https://smithery.ai/)")
+        st.markdown("🔍 [Smithery 直达链接](https://smithery.ai/)")
         hint = """{
   "mcpServers": {
     "perplexity-search": {
@@ -108,8 +108,8 @@ else:
   }
 }
 """
-        new_tool_text = st.text_area("도구 JSON 입력", hint, height=260)
-        if st.button("추가", key="add_tool"):
+        new_tool_text = st.text_area("工具JSON输入", hint, height=260)
+        if st.button("添加", key="add_tool"):
             text = new_tool_text.strip()
             try:
                 new_tool = json.loads(text)
@@ -117,7 +117,7 @@ else:
                 try:
                     new_tool = json.loads(f"{{{text}}}")
                 except json.JSONDecodeError as e:
-                    st.error(f"JSON 파싱 오류: {e}")
+                    st.error(f"JSON解析错误: {e}")
                     new_tool = None
             if new_tool is not None:
                 if "mcpServers" in new_tool and isinstance(
@@ -133,7 +133,7 @@ else:
                         name
                     ] = cfg
                 added = ", ".join(tools_data.keys())
-                st.success(f"도구 '{added}' 추가됨")
+                st.success(f"工具 '{added}' 已添加")
                 st.rerun()
 
     # Tab3: JSON Preview
@@ -156,7 +156,7 @@ else:
     with tab5:
         preview_cd = deepcopy(st.session_state.tool_config)
         servers_cd = preview_cd.get("mcpServers", {})
-        # URL 파라미터가 있는 엔트리 확인 및 제거
+        # 检查并移除包含URL参数的条目
         invalid = [
             name
             for name, cfg in servers_cd.items()
@@ -164,17 +164,17 @@ else:
         ]
         if invalid:
             st.error(
-                f"Claude Desktop에서 지원하지 않는 'url' 파라미터가 포함되어 다음 도구를 제외했습니다: {', '.join(invalid)}"
+                f"Claude Desktop不支持包含'url'参数的工具，已排除以下工具: {', '.join(invalid)}"
             )
             for name in invalid:
                 del servers_cd[name]
-        # transport 제거
+        # 移除transport
         for cfg in servers_cd.values():
             if isinstance(cfg, dict) and "transport" in cfg:
                 del cfg["transport"]
         st.code(json.dumps(preview_cd, indent=2, ensure_ascii=False), language="json")
 
-# 하단 저장 메시지 출력
+# 底部保存消息输出
 with st.sidebar:
     if st.session_state.get("saved_msg"):
         st.success(st.session_state.pop("saved_msg"))
